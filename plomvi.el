@@ -44,7 +44,7 @@
 
 
 (defun plomvi-nothing()
-  "Do nothing. Used to shadow self-insert bindings in `plomvi-editable-mode-map'."
+  "Do nothing. Used to shadow self-insert bindings in `plomvi-mode-editable-map'."
   (interactive))
 
 (defun plomvi-half-scroll()
@@ -221,9 +221,18 @@ Note that this ignores killed rectangles."
   (interactive)
   (message "Vim-style redo not available. Try M-x for Emacs' undo-undo."))
 
+(defun plomvi-activate()
+  "Activate `plomvi-mode'."
+  (interactive)
+  (plomvi-mode))
 
-(defvar plomvi-basic-mode-map (make-sparse-keymap)
-  "Keymap for `plomvi-basic-mode', to be used on read-only buffers.
+(defun plomvi-deactivate()
+  "Deactivate `plomvi-mode'."
+  (interactive)
+  (plomvi-mode -1))
+
+(defvar plomvi-mode-basic-map (make-sparse-keymap)
+  "Keymap for `plomvi-mode' on read-only buffers.
 
 In contrast to the keymap `plomvi-editable-mode' for editable buffers,
 this not only excludes keybindings for editing text, but also does not
@@ -231,102 +240,109 @@ shadow keybindings that are bound to `self-insert-command'.
 
 Thus, it on the whole shadows much fewer keybindings of other keymaps
 that can therefore be used for other purposes.")
-(define-key plomvi-basic-mode-map (kbd ":") 'plomvi-prompt)
-(define-key plomvi-basic-mode-map (kbd "C-w") 'other-window)
-(define-key plomvi-basic-mode-map (kbd "k") 'previous-line)
-(define-key plomvi-basic-mode-map (kbd "j") 'next-line)
-(define-key plomvi-basic-mode-map (kbd "h") 'left-char)
-(define-key plomvi-basic-mode-map (kbd "l") 'right-char)
-(define-key plomvi-basic-mode-map (kbd "w") 'forward-word)
-(define-key plomvi-basic-mode-map (kbd "b") 'backward-word)
-(define-key plomvi-basic-mode-map (kbd "/") 'isearch-forward)
-(define-key plomvi-basic-mode-map (kbd "N") 'plomvi-search-backward)
-(define-key plomvi-basic-mode-map (kbd "n") 'plomvi-search-forward)
-(define-key plomvi-basic-mode-map (kbd "v") 'set-mark-command)
-(define-key plomvi-basic-mode-map (kbd "C-v") 'plomvi-rectangle-mark)
+(define-key plomvi-mode-basic-map (kbd ":") 'plomvi-prompt)
+(define-key plomvi-mode-basic-map (kbd "C-w") 'other-window)
+(define-key plomvi-mode-basic-map (kbd "k") 'previous-line)
+(define-key plomvi-mode-basic-map (kbd "j") 'next-line)
+(define-key plomvi-mode-basic-map (kbd "h") 'left-char)
+(define-key plomvi-mode-basic-map (kbd "l") 'right-char)
+(define-key plomvi-mode-basic-map (kbd "w") 'forward-word)
+(define-key plomvi-mode-basic-map (kbd "b") 'backward-word)
+(define-key plomvi-mode-basic-map (kbd "/") 'isearch-forward)
+(define-key plomvi-mode-basic-map (kbd "N") 'plomvi-search-backward)
+(define-key plomvi-mode-basic-map (kbd "n") 'plomvi-search-forward)
+(define-key plomvi-mode-basic-map (kbd "v") 'set-mark-command)
+(define-key plomvi-mode-basic-map (kbd "C-v") 'plomvi-rectangle-mark)
 (define-prefix-command 'plomvi-g-map)
-(define-key plomvi-basic-mode-map (kbd "g") 'plomvi-g-map)
+(define-key plomvi-mode-basic-map (kbd "g") 'plomvi-g-map)
 (define-key plomvi-g-map (kbd "g") 'beginning-of-buffer)
-(define-key plomvi-basic-mode-map (kbd "G") 'plomvi-goto-line)
-(define-key plomvi-basic-mode-map (kbd "$") 'end-of-line)
-(define-key plomvi-basic-mode-map (kbd "0") 'plomvi-prefix-zero-or-line-start)
-(define-key plomvi-basic-mode-map (kbd "1") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "2") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "3") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "4") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "5") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "6") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "7") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "8") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "9") 'digit-argument)
-(define-key plomvi-basic-mode-map (kbd "C-b") 'scroll-down)
-(define-key plomvi-basic-mode-map (kbd "C-f") 'scroll-up)
-(define-key plomvi-basic-mode-map (kbd "C-d") 'plomvi-half-scroll)
-(define-minor-mode plomvi-basic-mode
-  "plomvi mode for read-only buffers; uses `plomvi-basic-mode-map' to
-implement Vim-Normal-mode-style keybindings."
-  nil " PV" plomvi-basic-mode-map)
+(define-key plomvi-mode-basic-map (kbd "G") 'plomvi-goto-line)
+(define-key plomvi-mode-basic-map (kbd "$") 'end-of-line)
+(define-key plomvi-mode-basic-map (kbd "0") 'plomvi-prefix-zero-or-line-start)
+(define-key plomvi-mode-basic-map (kbd "1") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "2") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "3") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "4") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "5") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "6") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "7") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "8") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "9") 'digit-argument)
+(define-key plomvi-mode-basic-map (kbd "C-b") 'scroll-down)
+(define-key plomvi-mode-basic-map (kbd "C-f") 'scroll-up)
+(define-key plomvi-mode-basic-map (kbd "C-d") 'plomvi-half-scroll)
 
-(defvar plomvi-editable-mode-map (make-sparse-keymap)
-  "Keymap for `plomvi-editable-mode'.
+(defvar plomvi-mode-editable-map (make-sparse-keymap)
+  "Keymap for `plomvi-mode' on editable buffers.
 
-Inherits from `plomvi-basic-mode-map', but adds keybindings for text editing
+Inherits from `plomvi-mode-basic-map', but adds keybindings for text editing
 and shadows keybindings bound to `self-insert-command' to avoid accidentally
 typing text outside of what would be Vim's Insert mode.")
-(set-keymap-parent plomvi-editable-mode-map plomvi-basic-mode-map)
-(define-key plomvi-editable-mode-map [remap self-insert-command] 'plomvi-nothing)
-(define-key plomvi-editable-mode-map (kbd "i") 'plomvi-deactivate)
-(define-key plomvi-editable-mode-map (kbd "x") 'plomvi-x)
-(define-key plomvi-editable-mode-map (kbd "o") 'plomvi-newline-below)
-(define-key plomvi-editable-mode-map (kbd "O") 'plomvi-newline-above)
-(define-key plomvi-editable-mode-map (kbd "r") 'plomvi-replace-char)
-(define-key plomvi-editable-mode-map (kbd "u") 'undo-only)
-(define-key plomvi-editable-mode-map (kbd "C-r") 'plomvi-no-redo)
-;(define-key plomvi-editable-mode-map (kbd "u") 'plomvi-undo)
-;(define-key plomvi-editable-mode-map (kbd "C-r") 'plomvi-redo)
-(define-key plomvi-editable-mode-map (kbd "I") 'string-insert-rectangle)
-(define-key plomvi-editable-mode-map (kbd "p") 'plomvi-paste-forward)
-(define-key plomvi-editable-mode-map (kbd "P") 'plomvi-paste-backward)
-(define-key plomvi-editable-mode-map (kbd "Y") 'plomvi-copy-line)
-(define-key plomvi-editable-mode-map (kbd "y") 'plomvi-copy-region)
-(define-key plomvi-editable-mode-map (kbd "D") 'plomvi-region-kill)
+(set-keymap-parent plomvi-mode-editable-map plomvi-mode-basic-map)
+(define-key plomvi-mode-editable-map [remap self-insert-command] 'plomvi-nothing)
+(define-key plomvi-mode-editable-map (kbd "i") 'plomvi-deactivate)
+(define-key plomvi-mode-editable-map (kbd "x") 'plomvi-x)
+(define-key plomvi-mode-editable-map (kbd "o") 'plomvi-newline-below)
+(define-key plomvi-mode-editable-map (kbd "O") 'plomvi-newline-above)
+(define-key plomvi-mode-editable-map (kbd "r") 'plomvi-replace-char)
+(define-key plomvi-mode-editable-map (kbd "u") 'undo-only)
+(define-key plomvi-mode-editable-map (kbd "C-r") 'plomvi-no-redo)
+;(define-key plomvi-mode-editable-map (kbd "u") 'plomvi-undo)
+;(define-key plomvi-mode-editable-map (kbd "C-r") 'plomvi-redo)
+(define-key plomvi-mode-editable-map (kbd "I") 'string-insert-rectangle)
+(define-key plomvi-mode-editable-map (kbd "p") 'plomvi-paste-forward)
+(define-key plomvi-mode-editable-map (kbd "P") 'plomvi-paste-backward)
+(define-key plomvi-mode-editable-map (kbd "Y") 'plomvi-copy-line)
+(define-key plomvi-mode-editable-map (kbd "y") 'plomvi-copy-region)
+(define-key plomvi-mode-editable-map (kbd "D") 'plomvi-region-kill)
 (define-prefix-command 'plomvi-d-map)
-(define-key plomvi-editable-mode-map (kbd "d") 'plomvi-d-map)
+(define-key plomvi-mode-editable-map (kbd "d") 'plomvi-d-map)
 (define-key plomvi-d-map (kbd "w") 'kill-word)
 (define-key plomvi-d-map (kbd "$") 'kill-line)
 (define-key plomvi-d-map (kbd "d") 'kill-whole-line)
-(define-minor-mode plomvi-editable-mode
-  "plomvi mode for editable buffers; uses `plomvi-editable-mode-map' to
-shadow `self-insert-command' keybindings and implement Vim-Normal-mode-style
-keybindings."
-  nil " PVe" plomvi-editable-mode-map)
+(defvar plomvi-mode-hook)
+(defvar plomvi-mode-basic-hook)
+(defvar plomvi-mode-editable-hook)
+(defvar plomvi-mode-disable-hook)
+(defvar plomvi-mode-basic-disable-hook)
+(defvar plomvi-mode-editable-disable-hook)
+(defvar-local plomvi-mode nil "mode variable for `plomvi-mode'")
+(defvar-local plomvi-mode-basic nil
+  "toggles `plomvi-mode-basic-map' in `minor-mode-map-alist' for `plomvi-mode'")
+(defvar-local plomvi-mode-editable nil
+  "toggles `plomvi-mode-editable-map' in `minor-mode-map-alist' for `plomvi-mode'")
 
-(define-minor-mode plomvi-mode
-  "Imperfectly emulates a subset of Vim normal mode.
+(defun plomvi-mode (&optional arg)
+  "Imperfectly emulates a subset of Vim's Normal mode.
 
-Actually encapsulates either `plomvi-basic-mode' or `plomvi-editable-mode'.
-Use `plomvi-activate' and `plomvi-deactivate' to toggle those.")
-
-(defun plomvi-activate ()
-  "Outside mini-buffer, activate `plomvi-mode'.
-
-For read only-buffers, activate `plomvi-basic-mode'; else, `plomvi-editable-mode'."
-  (interactive)
-  (unless (minibufferp)
-    ;(universal-argument)
-    (plomvi-mode 1)
-    (if buffer-read-only
-        (plomvi-basic-mode 1)
-      (plomvi-editable-mode 1))))
-
-(defun plomvi-deactivate()
-  "Outside mini-buffer, deactivate `plomvi-mode'.
-
-For read only-buffers, deactivate `plomvi-basic-mode'; else, `plomvi-editable-mode'."
-  (interactive)
-  (plomvi-mode -1)
-  (if buffer-read-only
-      (plomvi-basic-mode -1)
-    (plomvi-editable-mode -1)))
+Sets mode variable `plomvi-mode' and, on read-only buffers, `plomvi-mode-basic',
+or, on editable buffers, `plomvi-mode-editable'. The latter two's values in
+`minor-mode-map-alist' toggle either `plomvi-mode-basic-map' or
+`plomvi-mode-editable-map'."
+  (interactive (list (or current-prefix-arg 'toggle)))
+  (let ((enable (if (eq arg 'toggle)
+                    (not plomvi-mode)
+                  (> (prefix-numeric-value arg) 0 ))))
+    (if enable
+        (unless (minibufferp)
+          (if buffer-read-only
+              (setq plomvi-mode-basic t)
+            (setq plomvi-mode-editable t))
+          (setq plomvi-mode t)
+          (run-hooks 'plomvi-mode-hook)
+          (if plomvi-mode-basic
+              (run-hooks 'plomvi-mode-basic-hook)
+            (run-hooks 'plomvi-mode-editable-hook)))
+      (setq plomvi-mode-editable nil
+            plomvi-mode-basic nil
+            plomvi-mode nil)
+      (run-hooks 'plomvi-mode-editable-disable-hook)
+      (run-hooks 'plomvi-mode-basic-disable-hook)
+      (run-hooks 'plomvi-mode-disable-hook))))
 
 (define-globalized-minor-mode plomvi-global-mode plomvi-mode plomvi-activate)
+(add-to-list 'minor-mode-alist '(plomvi-mode " PV"))
+(add-to-list 'minor-mode-map-alist (cons 'plomvi-mode-basic
+                                         plomvi-mode-basic-map))
+(add-to-list 'minor-mode-map-alist (cons 'plomvi-mode-editable
+                                         plomvi-mode-editable-map))
