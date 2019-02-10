@@ -193,29 +193,6 @@ Note that this ignores killed rectangles."
   (interactive "cplomvi-replace-char")
   (delete-char 1) (insert-char c) (left-char))
 
-;;; some attempt at a redo feature, not very successful, documented here for
-;;; research purposes
-;
-;(setq plomvi-in-redo nil)  ; should be made buffer-local
-;(setq plomvi-undo-count 0) ; should be made buffer-local
-;(defun plomvi-undo()
-;  (interactive)
-;  (undo-only)
-;  (setq plomvi-in-redo nil)
-;  (setq plomvi-undo-count (+ plomvi-undo-count 1)))
-;(defun plomvi-redo()
-;  (interactive)
-;  (if (> plomvi-undo-count 0)
-;      (progn
-;        (if (null plomvi-in-redo)
-;            (progn
-;              (insert-char ?\s 1)
-;              (undo)
-;              (setq plomvi-in-redo t)))
-;        (progn
-;          (undo)
-;          (setq plomvi-undo-count (- plomvi-undo-count 1))))))
-
 (defun plomvi-no-redo()
   "Tell user what to do, since implementing vim redo was too much of a hassle."
   (interactive)
@@ -287,8 +264,6 @@ typing text outside of what would be Vim's Insert mode.")
 (define-key plomvi-mode-editable-map (kbd "r") 'plomvi-replace-char)
 (define-key plomvi-mode-editable-map (kbd "u") 'undo-only)
 (define-key plomvi-mode-editable-map (kbd "C-r") 'plomvi-no-redo)
-;(define-key plomvi-mode-editable-map (kbd "u") 'plomvi-undo)
-;(define-key plomvi-mode-editable-map (kbd "C-r") 'plomvi-redo)
 (define-key plomvi-mode-editable-map (kbd "I") 'string-insert-rectangle)
 (define-key plomvi-mode-editable-map (kbd "p") 'plomvi-paste-forward)
 (define-key plomvi-mode-editable-map (kbd "P") 'plomvi-paste-backward)
@@ -320,9 +295,9 @@ or, on editable buffers, `plomvi-mode-editable'. The latter two's values in
 `minor-mode-map-alist' toggle either `plomvi-mode-basic-map' or
 `plomvi-mode-editable-map'."
   (interactive (list (or current-prefix-arg 'toggle)))
-  (let ((enable (if (eq arg 'toggle)
-                    (not plomvi-mode)
-                  (> (prefix-numeric-value arg) 0 ))))
+  (let ((enable (if (eq arg 'toggle)                   ; follow suggestions
+                    (not plomvi-mode)                  ; from (elisp)Minor
+                  (> (prefix-numeric-value arg) 0 )))) ; Mode Conventions
     (if enable
         (unless (minibufferp)
           (if buffer-read-only
