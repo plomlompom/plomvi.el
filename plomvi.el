@@ -170,14 +170,31 @@ Note that this ignores killed rectangles."
   (interactive)
   (search-backward isearch-string))
 
-
-(defun plomvi-copy-line()
-  "Copy current line into kill buffer."
+(defun plomvi-Y()
+  "Copy rectangle, or full line, or region in full lines."
   (interactive)
-  (let ((keep_pos (point)))  ; We sort of cheat: We kill the line, then we
-    (kill-whole-line)        ; paste it back, and return point to its
-    (plomvi-paste-backward)  ; original position.
-    (goto-char keep_pos)))   ;
+  (cond
+   ((and (boundp 'rectangle-mark-mode) (eq t rectangle-mark-mode))
+    (copy-rectangle-as-kill (region-beginning) (region-end)))
+   ((use-region-p)
+    (let* ((start-start-pos (region-beginning))
+           (start-end-pos (region-end))
+           (region-start (progn
+                           (goto-char start-start-pos)
+                           (beginning-of-line)
+                           (point)))
+           (region-end (progn
+                         (goto-char start-end-pos)
+                         (end-of-line)
+                         (+ 1 (point)))))
+      (copy-region-as-kill region-start region-end)
+      (goto-char region-start)))
+   (t
+    (let ((keep-pos (point))
+          (region-start (progn (beginning-of-line) (point)))
+          (region-end (progn (end-of-line) (+ 1 (point)))))
+      (copy-region-as-kill region-start region-end)
+      (goto-char keep-pos)))))
 
 (defun plomvi-copy-region()
   "Copy marked region."
@@ -259,7 +276,7 @@ text editing.")
 (define-key plomvi-mode-editable-map (kbd "I") 'string-insert-rectangle)
 (define-key plomvi-mode-editable-map (kbd "p") 'plomvi-paste-forward)
 (define-key plomvi-mode-editable-map (kbd "P") 'plomvi-paste-backward)
-(define-key plomvi-mode-editable-map (kbd "Y") 'plomvi-copy-line)
+(define-key plomvi-mode-editable-map (kbd "Y") 'plomvi-Y)
 (define-key plomvi-mode-editable-map (kbd "y") 'plomvi-copy-region)
 (define-key plomvi-mode-editable-map (kbd "D") 'plomvi-region-kill)
 (define-prefix-command 'plomvi-d-map)
