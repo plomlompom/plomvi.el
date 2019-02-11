@@ -43,10 +43,6 @@
 
 
 
-(defun plomvi-nothing()
-  "Do nothing. Used to shadow self-insert bindings in `plomvi-mode-editable-map'."
-  (interactive))
-
 (defun plomvi-half-scroll()
   "Scroll down half a screen width."
   (interactive)
@@ -211,12 +207,10 @@ Note that this ignores killed rectangles."
 (defvar plomvi-mode-basic-map (make-sparse-keymap)
   "Keymap for `plomvi-mode' on read-only buffers.
 
-In contrast to the keymap `plomvi-editable-mode' for editable buffers,
-this not only excludes keybindings for editing text, but also does not
-shadow keybindings that are bound to `self-insert-command'.
-
-Thus, it on the whole shadows much fewer keybindings of other keymaps
-that can therefore be used for other purposes.")
+In contrast to the keymap `plomvi-editable-mode' for editable
+buffers, this excludes keybindings for editing text, which thus
+become available to be used for other purposes.")
+(suppress-keymap plomvi-mode-basic-map t)
 (define-key plomvi-mode-basic-map (kbd ":") 'plomvi-prompt)
 (define-key plomvi-mode-basic-map (kbd "C-w") 'other-window)
 (define-key plomvi-mode-basic-map (kbd "k") 'previous-line)
@@ -252,11 +246,9 @@ that can therefore be used for other purposes.")
 (defvar plomvi-mode-editable-map (make-sparse-keymap)
   "Keymap for `plomvi-mode' on editable buffers.
 
-Inherits from `plomvi-mode-basic-map', but adds keybindings for text editing
-and shadows keybindings bound to `self-insert-command' to avoid accidentally
-typing text outside of what would be Vim's Insert mode.")
+Inherits from `plomvi-mode-basic-map', but adds keybindings for
+text editing.")
 (set-keymap-parent plomvi-mode-editable-map plomvi-mode-basic-map)
-(define-key plomvi-mode-editable-map [remap self-insert-command] 'plomvi-nothing)
 (define-key plomvi-mode-editable-map (kbd "i") 'plomvi-deactivate)
 (define-key plomvi-mode-editable-map (kbd "x") 'plomvi-x)
 (define-key plomvi-mode-editable-map (kbd "o") 'plomvi-newline-below)
