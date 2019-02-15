@@ -153,7 +153,7 @@ Note that this ignores killed rectangles."
 (defun plomvi-kill-region-lines()
   "Kill lines of marked region."
   (interactive)
-  (plomvi-foo 'kill-region))
+  (plomvi-affect-lines-of-region 'kill-region))
 
 (defun plomvi-x()
   "If rectangle or region marked, kill those; else, kill char after point."
@@ -190,7 +190,7 @@ Note that this ignores killed rectangles."
    ((and (boundp 'rectangle-mark-mode) (eq t rectangle-mark-mode))
     (copy-rectangle-as-kill (region-beginning) (region-end)))
    ((use-region-p)
-    (plomvi-foo 'copy-region-as-kill))
+    (plomvi-affect-lines-of-region 'copy-region-as-kill))
    (t
     (copy-region-as-kill (line-beginning-position) (+ 1 (line-end-position))))))
 
