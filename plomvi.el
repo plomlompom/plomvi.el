@@ -137,10 +137,23 @@ Note that this ignores killed rectangles."
     (yank)
     (previous-line)))
 
-(defun plomvi-region-kill()
-  "Kill marked region."
+(defun plomvi-affect-lines-of-region(f)
+  "Call f on start of first line of region and end of last line of region."
+  (let* ((start-start-pos (region-beginning))
+         (start-end-pos (region-end))
+         (region-start (progn
+                         (goto-char start-start-pos)
+                         (line-beginning-position)))
+         (region-end (progn
+                       (goto-char start-end-pos)
+                       (+ 1 (line-end-position)))))
+    (funcall f region-start region-end)
+    (goto-char region-start)))
+
+(defun plomvi-kill-region-lines()
+  "Kill lines of marked region."
   (interactive)
-  (kill-region (region-beginning) (region-end)))
+  (plomvi-foo 'kill-region))
 
 (defun plomvi-x()
   "If rectangle or region marked, kill those; else, kill char after point."
@@ -149,7 +162,7 @@ Note that this ignores killed rectangles."
    ((and (boundp 'rectangle-mark-mode) (eq t rectangle-mark-mode))
     (kill-rectangle (region-beginning) (region-end)))
    ((use-region-p)
-    (plomvi-region-kill))
+    (kill-region (region-beginning) (region-end)))
    (t
     (delete-char 1))))
 
@@ -177,16 +190,7 @@ Note that this ignores killed rectangles."
    ((and (boundp 'rectangle-mark-mode) (eq t rectangle-mark-mode))
     (copy-rectangle-as-kill (region-beginning) (region-end)))
    ((use-region-p)
-    (let* ((start-start-pos (region-beginning))
-           (start-end-pos (region-end))
-           (region-start (progn
-                           (goto-char start-start-pos)
-                           (line-beginning-position)))
-           (region-end (progn
-                         (goto-char start-end-pos)
-                         (+ 1 (line-end-position)))))
-      (copy-region-as-kill region-start region-end)
-      (goto-char region-start)))
+    (plomvi-foo 'copy-region-as-kill))
    (t
     (copy-region-as-kill (line-beginning-position) (+ 1 (line-end-position))))))
 
@@ -272,7 +276,7 @@ text editing.")
 (define-key plomvi-mode-editable-map (kbd "P") 'plomvi-paste-backward)
 (define-key plomvi-mode-editable-map (kbd "Y") 'plomvi-Y)
 (define-key plomvi-mode-editable-map (kbd "y") 'plomvi-copy-region)
-(define-key plomvi-mode-editable-map (kbd "D") 'plomvi-region-kill)
+(define-key plomvi-mode-editable-map (kbd "D") 'plomvi-kill-region-lines)
 (define-prefix-command 'plomvi-d-map)
 (define-key plomvi-mode-editable-map (kbd "d") 'plomvi-d-map)
 (define-key plomvi-d-map (kbd "w") 'kill-word)
