@@ -181,20 +181,14 @@ Note that this ignores killed rectangles."
            (start-end-pos (region-end))
            (region-start (progn
                            (goto-char start-start-pos)
-                           (beginning-of-line)
-                           (point)))
+                           (line-beginning-position)))
            (region-end (progn
                          (goto-char start-end-pos)
-                         (end-of-line)
-                         (+ 1 (point)))))
+                         (+ 1 (line-end-position)))))
       (copy-region-as-kill region-start region-end)
       (goto-char region-start)))
    (t
-    (let ((keep-pos (point))
-          (region-start (progn (beginning-of-line) (point)))
-          (region-end (progn (end-of-line) (+ 1 (point)))))
-      (copy-region-as-kill region-start region-end)
-      (goto-char keep-pos)))))
+    (copy-region-as-kill (line-beginning-position) (+ 1 (line-end-position))))))
 
 (defun plomvi-copy-region()
   "Copy marked region."
