@@ -163,8 +163,9 @@ Note that this ignores killed rectangles."
     (kill-rectangle (region-beginning) (region-end)))
    ((use-region-p)
     (kill-region (region-beginning) (region-end)))
-   (t
-    (delete-char 1))))
+   ((not (= (line-beginning-position) (line-end-position)))
+    (delete-char 1)
+    (if (not (= (point) (line-beginning-position))) (backward-char)))))
 
 (defun plomvi-rectangle-mark()
   "Start marked rectangle, move right one char so a single column is visible."
@@ -219,6 +220,12 @@ Note that this ignores killed rectangles."
   (interactive)
   (plomvi-mode -1))
 
+(defun plomvi-end-of-line()
+  "Move to end of line exclusive line break char."
+  (interactive)
+  (end-of-line)
+  (if (not (= (point) (line-beginning-position))) (backward-char)))
+
 (defvar plomvi-mode-basic-map (make-sparse-keymap)
   "Keymap for `plomvi-mode' on read-only buffers.
 
@@ -243,7 +250,7 @@ become available to be used for other purposes.")
 (define-key plomvi-mode-basic-map (kbd "g") 'plomvi-g-map)
 (define-key plomvi-g-map (kbd "g") 'beginning-of-buffer)
 (define-key plomvi-mode-basic-map (kbd "G") 'plomvi-goto-line)
-(define-key plomvi-mode-basic-map (kbd "$") 'end-of-line)
+(define-key plomvi-mode-basic-map (kbd "$") 'plomvi-end-of-line)
 (define-key plomvi-mode-basic-map (kbd "0") 'plomvi-prefix-zero-or-line-start)
 (define-key plomvi-mode-basic-map (kbd "1") 'digit-argument)
 (define-key plomvi-mode-basic-map (kbd "2") 'digit-argument)
